@@ -1,0 +1,7 @@
+/Task_service/.idea
+/Task_service/app/.gitignore
+/Task_service/gradle/wrapper/gradle-wrapper.jar
+/Task_service/gradlew
+/Task_service/gradlew.bat
+/Task_service/settings.gradle
+/Task_service/gradle/wrapper/gradle-wrapper.properties
