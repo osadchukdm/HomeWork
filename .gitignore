@@ -5,3 +5,8 @@
 /Task_service/gradlew.bat
 /Task_service/settings.gradle
 /Task_service/gradle/wrapper/gradle-wrapper.properties
+/task4/.idea
+/task4/.gradle/2.14.1/taskArtifacts
+/task4/app/*.iml
+/task4/.gradle
+/task4/gradlew.bat
