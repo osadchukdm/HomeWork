@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">task1</string>
+    <string name="fileName">programCat</string>
+    <string name="error">Error</string>
+</resources>

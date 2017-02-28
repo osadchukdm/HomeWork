@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">task2</string>
+    <string name="firstActivity">First Activity</string>
+    <string name="secondActivity">Second Activity</string>
+</resources>

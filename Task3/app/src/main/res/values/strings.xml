@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">ServiceTask</string>
+
+    <string name="start">Start</string>
+    <string name="stop">Stop</string>
+    <string name="apply">Apply</string>
+
+    <string name="default_notification_message">Выпей чаю!!!</string>
+
+</resources>
