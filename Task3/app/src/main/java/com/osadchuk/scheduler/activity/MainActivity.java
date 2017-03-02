@@ -13,9 +13,6 @@ import com.osadchuk.scheduler.service.SchedulerService;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final int CMD_START = 1;
-    private final int CMD_STOP = 2;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,9 +38,6 @@ public class MainActivity extends AppCompatActivity {
         buttonStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-               /* Intent intent = new Intent(getApplicationContext(), SchedulerService.class);
-                intent.putExtra("cmd", CMD_STOP);
-                startService(intent);*/
                 stopService(
                         new Intent(MainActivity.this, SchedulerService.class));
 
