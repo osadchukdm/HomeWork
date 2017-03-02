@@ -8,13 +8,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-
 import com.osadchuk.scheduler.R;
 import com.osadchuk.scheduler.service.SchedulerService;
 
 public class SettingsActivity extends AppCompatActivity {
-
-    private final int CMD_SHOW_NOTIFICATION = 3;
 
     private EditText newMessage;
 
@@ -27,8 +24,7 @@ public class SettingsActivity extends AppCompatActivity {
 
         SharedPreferences preferences = getApplicationContext()
                 .getSharedPreferences("prefs", Context.MODE_PRIVATE);
-        String message = preferences.getString
-                ("message", getString(R.string.default_notification_message));
+        String message = preferences.getString("message", getString(R.string.default_notification_message));
         newMessage.setText(message);
 
         Button button =(Button)findViewById(R.id.apply);
@@ -37,13 +33,15 @@ public class SettingsActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                String message = newMessage.getText().toString();
+                String messageService = newMessage.getText().toString();
 
-                SharedPreferences preferences = getApplicationContext().getSharedPreferences("prefs", Context.MODE_PRIVATE);
+                SharedPreferences preferences = getApplicationContext().
+                        getSharedPreferences("prefs", Context.MODE_PRIVATE);
+
                 SharedPreferences.Editor editor = preferences.edit();
-                editor.putString("message", message);
-                editor.commit();
-                sendNotification(message);
+                editor.putString("message", messageService);
+                editor.apply();
+                sendNotification(messageService);
                 finish();
             }
         });
@@ -53,7 +51,7 @@ public class SettingsActivity extends AppCompatActivity {
     private void sendNotification(String message) {
         Intent intent = new Intent(getApplicationContext(), SchedulerService.class);
         intent.putExtra("message", message);
-        intent.putExtra("cmd", CMD_SHOW_NOTIFICATION);
+        stopService(intent);
         startService(intent);
     }
 }

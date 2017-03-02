@@ -26,7 +26,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                SharedPreferences preferences = getApplicationContext().getSharedPreferences("prefs", Context.MODE_PRIVATE);
+                SharedPreferences preferences = getApplicationContext().
+                        getSharedPreferences("prefs", Context.MODE_PRIVATE);
                 String message = preferences.getString("message", getString(R.string.default_notification_message));
 
                 Intent intent = new Intent(getApplicationContext(), SchedulerService.class);
@@ -40,9 +41,11 @@ public class MainActivity extends AppCompatActivity {
         buttonStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), SchedulerService.class);
+               /* Intent intent = new Intent(getApplicationContext(), SchedulerService.class);
                 intent.putExtra("cmd", CMD_STOP);
-                startService(intent);
+                startService(intent);*/
+                stopService(
+                        new Intent(MainActivity.this, SchedulerService.class));
 
             }
         });
