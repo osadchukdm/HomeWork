@@ -10,12 +10,11 @@ import android.os.Environment;
 import android.provider.MediaStore;
 
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.DefaultItemAnimator;
+
 import android.support.v7.widget.LinearLayoutManager;
 
-import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
+
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -48,12 +47,16 @@ public class MainActivity extends AppCompatActivity{
         mDataSet = new ArrayList<String>();
 
         photo = (ImageView) findViewById(R.id.ivPhoto);
+
         getDataSet();
+
         recyclerView = (RecyclerView) findViewById(R.id.rec);
+
         mLayoutManager = new LinearLayoutManager(this, 0, false);
         recyclerView.setLayoutManager(mLayoutManager);
         mAdapter = new RecyclerAdapter(mDataSet);
         recyclerView.setAdapter(mAdapter);
+
         mAdapter.SetOnItemClickListener(new RecyclerClick() {
             @Override
             public void onItemClick(View view, int position) {
@@ -61,7 +64,6 @@ public class MainActivity extends AppCompatActivity{
 
                 photo.setRotation(90);
                 photo.setImageBitmap(map);
-                Log.d("sdf", String.valueOf(position));
             }
         });
 
@@ -130,24 +132,5 @@ public class MainActivity extends AppCompatActivity{
         return Uri.fromFile(newFile);
     }
 
-   /* @Override
-    public void onItemClick(View view, int position) {
-        Bitmap map = BitmapFactory.decodeFile(mDataSet.get(position));
-        photo.setRotation(90);
-        photo.setImageBitmap(map);
-    }*/
-/*
-    @Override
-    public void onItemClick(View view, int position) {
-        Bitmap map = BitmapFactory.decodeFile(mDataSet.get(position));
-        photo.setRotation(90);
-        photo.setImageBitmap(map);
-    }*/
-/*
-    @Override
-    public void onItemClick(View view, int position) {
-        Bitmap map = BitmapFactory.decodeFile(mDataSet.get(position));
-        photo.setRotation(90);
-        photo.setImageBitmap(map);
-    }*/
+
 }

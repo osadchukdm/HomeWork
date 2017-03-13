@@ -52,9 +52,6 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         mDataSet = dataSet;
     }
 
-
-
-
     @Override
     public RecyclerAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
                                                          int viewType) {
@@ -76,10 +73,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
             Bitmap newq = Bitmap.createScaledBitmap(map, map.getWidth() / 12, map.getHeight() / 12, false);
             holder.photoSmall.setRotation(90);
             holder.photoSmall.setImageBitmap(newq);
-           // holder.photoSmall.setOnClickListener(recyclerClick);
-
-
-
+   
     }
     // Возвращает размер данных (вызывается layout manager-ом)
     @Override
