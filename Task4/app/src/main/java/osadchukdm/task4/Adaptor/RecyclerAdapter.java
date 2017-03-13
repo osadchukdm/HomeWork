@@ -1,38 +1,59 @@
 package osadchukdm.task4.Adaptor;
 
-import android.content.Context;
-import android.net.Uri;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import com.squareup.picasso.Picasso;
-import java.io.File;
+
+
+import java.util.ArrayList;
+
 import osadchukdm.task4.R;
+import osadchukdm.task4.Interface.RecyclerClick;
+
 
 public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder>{
 
-    private String[] mDataset;
-    private Context contextt;
+    ArrayList<String> mDataSet;
+    RecyclerClick recyclerClick;
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        // наш пункт состоит только из одного TextView
+    public void SetOnItemClickListener(final RecyclerClick recyclerClick) {
+        this.recyclerClick = recyclerClick;
+    }
+    public class ViewHolder extends RecyclerView.ViewHolder
+            implements View.OnClickListener {
+
         ImageView photoSmall;
+        //private RecyclerClick recyclerClick;
 
-        public ViewHolder(View v) {
-            super(v);
-            photoSmall=(ImageView)v.findViewById(R.id.photoSmall);
+        public ViewHolder(View itemView) {
+            super(itemView);
+
+            photoSmall=(ImageView)itemView.findViewById(R.id.photoSmall);
+            itemView.setOnClickListener(this);
 
         }
+
+        @Override
+        public void onClick(View v) {
+            recyclerClick.onItemClick(v,getAdapterPosition());
+        }
+
     }
 
     // Конструктор
-    public RecyclerAdapter(String[] dataset,Context con) {
-        mDataset = dataset;
-        contextt=con;
+    public RecyclerAdapter(ArrayList<String> dataSet) {
+
+        mDataSet = dataSet;
     }
+
+
+
 
     @Override
     public RecyclerAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
@@ -48,22 +69,23 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     }
     // Заменяет контент отдельного view (вызывается layout manager-ом)
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(final ViewHolder holder, int position) {
 
-        if(mDataset[position]!=null){
-            Log.d("may", mDataset[position]);
-            File imagePath = new File(mDataset[position]);
-            Picasso.with(contextt)
-                    .load(imagePath)
-                    .resize(50, 50)
-                    .into(holder.photoSmall);
-       }
+            Bitmap map = BitmapFactory.decodeFile(mDataSet.get(position));
+            Log.d("may", mDataSet.get(position));
+            Bitmap newq = Bitmap.createScaledBitmap(map, map.getWidth() / 12, map.getHeight() / 12, false);
+            holder.photoSmall.setRotation(90);
+            holder.photoSmall.setImageBitmap(newq);
+           // holder.photoSmall.setOnClickListener(recyclerClick);
+
+
 
     }
     // Возвращает размер данных (вызывается layout manager-ом)
     @Override
     public int getItemCount() {
-        return mDataset.length;
+
+        return mDataSet.size();
     }
 }
 
