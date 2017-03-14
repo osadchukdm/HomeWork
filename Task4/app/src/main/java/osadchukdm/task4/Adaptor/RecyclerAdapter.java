@@ -1,8 +1,10 @@
 package osadchukdm.task4.Adaptor;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,8 +13,12 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 
+import com.bumptech.glide.Glide;
+
+import java.net.URI;
 import java.util.ArrayList;
 
+import osadchukdm.task4.Loading.LoadingFile;
 import osadchukdm.task4.R;
 import osadchukdm.task4.Interface.RecyclerClick;
 
@@ -21,61 +27,60 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
 
     ArrayList<String> mDataSet;
     RecyclerClick recyclerClick;
+    Context context;
 
     public void SetOnItemClickListener(final RecyclerClick recyclerClick) {
         this.recyclerClick = recyclerClick;
     }
-    public class ViewHolder extends RecyclerView.ViewHolder
-            implements View.OnClickListener {
+    public class ViewHolder extends RecyclerView.ViewHolder{
 
         ImageView photoSmall;
-        //private RecyclerClick recyclerClick;
+        final int HIGHT=100;
+        final int WIGHT=100;
 
         public ViewHolder(View itemView) {
             super(itemView);
-
             photoSmall=(ImageView)itemView.findViewById(R.id.photoSmall);
-            itemView.setOnClickListener(this);
-
         }
-
-        @Override
-        public void onClick(View v) {
-            recyclerClick.onItemClick(v,getAdapterPosition());
+        public void loadImage(Context context, String imagePath) {
+            Glide.with(context).load(imagePath).override(HIGHT, WIGHT).
+                    centerCrop().into(photoSmall);
         }
 
     }
 
     // Конструктор
-    public RecyclerAdapter(ArrayList<String> dataSet) {
+    public RecyclerAdapter(ArrayList<String> dataSet,Context con) {
 
         mDataSet = dataSet;
-    }
+        context=con;
+       }
 
     @Override
     public RecyclerAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
                                                          int viewType) {
-        // create a new view
-        View v = LayoutInflater.from(parent.getContext())
+
+        View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.recycler_layout, parent, false);
 
-        // тут можно программно менять атрибуты лэйаута (size, margins, paddings и др.)
 
-        ViewHolder vh = new ViewHolder(v);
-        return vh;
+        ViewHolder viewHolder = new ViewHolder(view);
+        return viewHolder;
     }
-    // Заменяет контент отдельного view (вызывается layout manager-ом)
+
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
 
-            Bitmap map = BitmapFactory.decodeFile(mDataSet.get(position));
-            Log.d("may", mDataSet.get(position));
-            Bitmap newq = Bitmap.createScaledBitmap(map, map.getWidth() / 12, map.getHeight() / 12, false);
-            holder.photoSmall.setRotation(90);
-            holder.photoSmall.setImageBitmap(newq);
-   
+            holder.loadImage(context, mDataSet.get(position));
+
+            holder.photoSmall.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    recyclerClick.onItemClick(holder.getAdapterPosition());
+                }
+            });
     }
-    // Возвращает размер данных (вызывается layout manager-ом)
+
     @Override
     public int getItemCount() {
 

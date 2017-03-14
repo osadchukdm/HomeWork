@@ -1,9 +1,7 @@
 package osadchukdm.task4.Activity;
 
+import android.content.Context;
 import android.content.Intent;
-
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -17,11 +15,12 @@ import android.view.View;
 
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.Toast;
 import java.io.File;
 import java.util.ArrayList;
 
 import android.support.v7.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
 
 import osadchukdm.task4.Adaptor.RecyclerAdapter;
 import osadchukdm.task4.Interface.RecyclerClick;
@@ -30,6 +29,9 @@ import osadchukdm.task4.R;
 
 public class MainActivity extends AppCompatActivity{
     private static final int CAMERA_RESULT = 0;
+    private final int HIGHT=800;
+    private final int WIGHT=800;
+    private final int HORIZONTAL=0;
 
     ImageView photo;
     Uri directory;
@@ -37,6 +39,8 @@ public class MainActivity extends AppCompatActivity{
     RecyclerView recyclerView;
     RecyclerAdapter mAdapter;
     RecyclerView.LayoutManager mLayoutManager;
+    Context context;
+
 
     ArrayList<String> mDataSet;
 
@@ -44,47 +48,53 @@ public class MainActivity extends AppCompatActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        context=getApplicationContext();
+
         mDataSet = new ArrayList<String>();
-
         photo = (ImageView) findViewById(R.id.ivPhoto);
-
-        getDataSet();
 
         recyclerView = (RecyclerView) findViewById(R.id.rec);
 
-        mLayoutManager = new LinearLayoutManager(this, 0, false);
-        recyclerView.setLayoutManager(mLayoutManager);
-        mAdapter = new RecyclerAdapter(mDataSet);
-        recyclerView.setAdapter(mAdapter);
+        getDataSet();
 
-        mAdapter.SetOnItemClickListener(new RecyclerClick() {
-            @Override
-            public void onItemClick(View view, int position) {
-                Bitmap map = BitmapFactory.decodeFile(mDataSet.get(position));
+        initAdaptor();
 
-                photo.setRotation(90);
-                photo.setImageBitmap(map);
-            }
-        });
-
-        Button makePhoto = (Button) findViewById(R.id.buttonFoto);
+        final Button makePhoto = (Button) findViewById(R.id.buttonFoto);
         makePhoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                directory = generateFileUri();
-                if (directory == null) {
-                    Toast.makeText(getApplicationContext(), "SD card not available", Toast.LENGTH_LONG).show();
-                    return;
-                }
-
-                cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, directory);
-
-                startActivityForResult(cameraIntent, CAMERA_RESULT);
+                makePhoto();
             }
         });
 
     }
+
+    private void initAdaptor(){
+
+        mLayoutManager = new LinearLayoutManager(this, HORIZONTAL, false);
+        recyclerView.setLayoutManager(mLayoutManager);
+        mAdapter = new RecyclerAdapter(mDataSet,context);
+        recyclerView.setAdapter(mAdapter);
+
+        mAdapter.SetOnItemClickListener(new RecyclerClick() {
+            @Override
+            public void onItemClick(int position) {
+                Glide.with(context).load(mDataSet.get(position)).
+                        override(HIGHT,WIGHT).
+                        centerCrop().into(photo);
+            }
+        });
+
+    }
+
+    private void makePhoto(){
+        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        directory = generateFileUri();
+        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, directory);
+        startActivityForResult(cameraIntent, CAMERA_RESULT);
+    }
+
 
     private void getDataSet() {
         File[] fList;
@@ -94,7 +104,6 @@ public class MainActivity extends AppCompatActivity{
         fList = F.listFiles();
 
         for (int i = 0; i < fList.length; i++) {
-            //Нужны только папки в место isFile() пишим isDirectory()
             if (fList[i].isFile())
                 mDataSet.add(fList[i].getPath().toString());
 
@@ -105,10 +114,9 @@ public class MainActivity extends AppCompatActivity{
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-        photo.setImageURI(directory);
-
-        photo.setRotation(90);
+        Glide.with(context).load(directory).
+                override(HIGHT,WIGHT).
+                centerCrop().into(photo);
         mDataSet.add(directory.toString());
         recyclerView.getAdapter().notifyDataSetChanged();
 
