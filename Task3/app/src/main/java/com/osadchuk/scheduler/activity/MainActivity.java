@@ -18,7 +18,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Button buttonStart=(Button)findViewById(R.id.start);
+        final Button buttonStart=(Button)findViewById(R.id.start);
         buttonStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -28,9 +28,10 @@ public class MainActivity extends AppCompatActivity {
                 String message = preferences.getString("message", getString(R.string.default_notification_message));
 
                 Intent intent = new Intent(getApplicationContext(), SchedulerService.class);
-                intent.putExtra("cmd", CMD_START);
+                //intent.putExtra("cmd", CMD_START);
                 intent.putExtra("message", message);
                 startService(intent);
+                buttonStart.setEnabled(false);
             }
         });
 
@@ -40,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 stopService(
                         new Intent(MainActivity.this, SchedulerService.class));
-
+                buttonStart.setEnabled(true);
             }
         });
     }

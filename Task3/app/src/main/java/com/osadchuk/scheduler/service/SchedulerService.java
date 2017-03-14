@@ -57,7 +57,9 @@ public class SchedulerService extends Service {
         timerTask = new TimerTask() {
             @Override
             public void run() {
-                showNotification(intent.getStringExtra("message"));
+                if (intent != null){
+                    showNotification(intent.getStringExtra("message"));
+                }
             }
         };
         timer.schedule(timerTask, 0, CHECK_INTERVAL);
