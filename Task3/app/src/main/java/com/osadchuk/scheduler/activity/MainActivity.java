@@ -1,5 +1,6 @@
 package com.osadchuk.scheduler.activity;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -19,6 +20,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         final Button buttonStart=(Button)findViewById(R.id.start);
+
+        if(isServiceRunning(SchedulerService.class))
+            buttonStart.setEnabled(false);
+
         buttonStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -28,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
                 String message = preferences.getString("message", getString(R.string.default_notification_message));
 
                 Intent intent = new Intent(getApplicationContext(), SchedulerService.class);
-                //intent.putExtra("cmd", CMD_START);
+
                 intent.putExtra("message", message);
                 startService(intent);
                 buttonStart.setEnabled(false);
@@ -45,4 +50,14 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+    private boolean isServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }
