@@ -18,7 +18,7 @@ import com.bumptech.glide.Glide;
 import java.net.URI;
 import java.util.ArrayList;
 
-import osadchukdm.task4.Loading.LoadingFile;
+
 import osadchukdm.task4.R;
 import osadchukdm.task4.Interface.RecyclerClick;
 

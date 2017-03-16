@@ -28,20 +28,20 @@ import osadchukdm.task4.R;
 
 
 public class MainActivity extends AppCompatActivity{
+
     private static final int CAMERA_RESULT = 0;
     private final int HIGHT=800;
     private final int WIGHT=800;
     private final int HORIZONTAL=0;
 
     ImageView photo;
+    String imagePath;
     Uri directory;
     File newFile;
     RecyclerView recyclerView;
     RecyclerAdapter mAdapter;
     RecyclerView.LayoutManager mLayoutManager;
     Context context;
-
-
     ArrayList<String> mDataSet;
 
     @Override
@@ -70,22 +70,34 @@ public class MainActivity extends AppCompatActivity{
 
     }
 
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        imagePath = savedInstanceState.getString("key");
+        paint(imagePath);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("key", imagePath);
+    }
+
     private void initAdaptor(){
+        if(mDataSet!=null) {
+            mLayoutManager = new LinearLayoutManager(this, HORIZONTAL, false);
+            recyclerView.setLayoutManager(mLayoutManager);
+            mAdapter = new RecyclerAdapter(mDataSet, context);
+            recyclerView.setAdapter(mAdapter);
 
-        mLayoutManager = new LinearLayoutManager(this, HORIZONTAL, false);
-        recyclerView.setLayoutManager(mLayoutManager);
-        mAdapter = new RecyclerAdapter(mDataSet,context);
-        recyclerView.setAdapter(mAdapter);
-
-        mAdapter.SetOnItemClickListener(new RecyclerClick() {
-            @Override
-            public void onItemClick(int position) {
-                Glide.with(context).load(mDataSet.get(position)).
-                        override(HIGHT,WIGHT).
-                        centerCrop().into(photo);
-            }
-        });
-
+            mAdapter.SetOnItemClickListener(new RecyclerClick() {
+                @Override
+                public void onItemClick(int position) {
+                    paint(mDataSet.get(position));
+                    imagePath = mDataSet.get(position);
+                }
+            });
+        }
     }
 
     private void makePhoto(){
@@ -95,28 +107,34 @@ public class MainActivity extends AppCompatActivity{
         startActivityForResult(cameraIntent, CAMERA_RESULT);
     }
 
+    private void paint(String  path){
+        Glide.with(context).load(path).
+                override(HIGHT,WIGHT).
+                centerCrop().into(photo);
+    }
 
     private void getDataSet() {
         File[] fList;
-        File F = new File(Environment.getExternalStorageDirectory(),
-                "CameraTest");
+        try {
+            File F = new File(Environment.getExternalStorageDirectory(),
+                    "Camera Test");
 
-        fList = F.listFiles();
+            fList = F.listFiles();
 
-        for (int i = 0; i < fList.length; i++) {
-            if (fList[i].isFile())
-                mDataSet.add(fList[i].getPath().toString());
-
-
+            for (int i = 0; i < fList.length; i++) {
+                if (fList[i].isFile())
+                    mDataSet.add(fList[i].getPath().toString());
+            }
+        }catch (Exception e){
+            return;
         }
-
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Glide.with(context).load(directory).
-                override(HIGHT,WIGHT).
-                centerCrop().into(photo);
+    protected void onActivityResult(int requestCode, int resultCode,
+                                    Intent data) {
+        paint(directory.toString());
+        imagePath=directory.toString();
         mDataSet.add(directory.toString());
         recyclerView.getAdapter().notifyDataSetChanged();
 
@@ -124,11 +142,12 @@ public class MainActivity extends AppCompatActivity{
 
     private Uri generateFileUri() {
 
-        if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED))
+        if (!Environment.getExternalStorageState().equals(Environment.
+                MEDIA_MOUNTED))
             return null;
 
         File path = new File(Environment.getExternalStorageDirectory(),
-                "CameraTest");
+                "Camera Test");
         if (!path.exists()) {
             if (!path.mkdirs()) {
                 return null;
