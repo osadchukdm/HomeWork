@@ -13,6 +13,8 @@ import android.support.v7.widget.LinearLayoutManager;
 
 import android.view.View;
 
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
 import java.io.File;
@@ -40,9 +42,12 @@ public class MainActivity extends AppCompatActivity{
     File newFile;
     RecyclerView recyclerView;
     RecyclerAdapter mAdapter;
-    RecyclerView.LayoutManager mLayoutManager;
+    //RecyclerView.LayoutManager mLayoutManager;
     Context context;
     ArrayList<String> mDataSet;
+    private LinearLayoutManager mLayoutManager;
+    Animation animation;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +58,9 @@ public class MainActivity extends AppCompatActivity{
 
         mDataSet = new ArrayList<String>();
         photo = (ImageView) findViewById(R.id.ivPhoto);
+        //animation = AnimationUtils.loadAnimation(context, R.anim.invisible_to_visible);
+
+        //photo.startAnimation(animation);
 
         recyclerView = (RecyclerView) findViewById(R.id.rec);
 
@@ -95,8 +103,48 @@ public class MainActivity extends AppCompatActivity{
                 public void onItemClick(int position) {
                     paint(mDataSet.get(position));
                     imagePath = mDataSet.get(position);
+
                 }
             });
+            recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                    super.onScrollStateChanged(recyclerView, newState);
+                    checkFirstLastItems();
+                }
+
+                @Override
+                public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                    super.onScrolled(recyclerView, dx, dy);
+                    checkFirstLastItems();
+                }
+            });
+        }
+    }
+
+    private void checkFirstLastItems() {
+        int firstCompletePosition = mLayoutManager.
+                findFirstCompletelyVisibleItemPosition();
+        int lastCompletePosition = mLayoutManager.findLastCompletelyVisibleItemPosition();
+
+        int firstAlphaPosition = mLayoutManager.findFirstVisibleItemPosition();
+        int lastAlphaPosition = mLayoutManager.findLastVisibleItemPosition();
+
+        View view = mLayoutManager.findViewByPosition(firstAlphaPosition);
+        int locations[] = new int[2];
+        view.getLocationOnScreen(locations);
+        float alpha = 1 - Math.abs((float) locations[0] / view.getMeasuredWidth());
+        view.setAlpha(alpha);
+
+        view = mLayoutManager.findViewByPosition(lastAlphaPosition);
+        locations = new int[2];
+        view.getLocationOnScreen(locations);
+        alpha = Math.abs((float)(recyclerView.getMeasuredWidth() - locations[0]) / view.getMeasuredWidth());
+        view.setAlpha(alpha);
+
+        for (int i = firstCompletePosition; i <= lastCompletePosition; i++) {
+            view = mLayoutManager.findViewByPosition(i);
+            view.setAlpha(1f);
         }
     }
 
@@ -108,9 +156,13 @@ public class MainActivity extends AppCompatActivity{
     }
 
     private void paint(String  path){
+
+
         Glide.with(context).load(path).
                 override(HIGHT,WIGHT).
                 centerCrop().into(photo);
+        //photo.startAnimation(animation);
+
     }
 
     private void getDataSet() {
@@ -133,11 +185,14 @@ public class MainActivity extends AppCompatActivity{
     @Override
     protected void onActivityResult(int requestCode, int resultCode,
                                     Intent data) {
-        paint(directory.toString());
-        imagePath=directory.toString();
-        mDataSet.add(directory.toString());
-        recyclerView.getAdapter().notifyDataSetChanged();
 
+        if(requestCode == CAMERA_RESULT && resultCode == RESULT_OK) {
+            paint(directory.toString());
+            imagePath = directory.toString();
+            mDataSet.add(directory.toString());
+            recyclerView.getAdapter().notifyDataSetChanged();
+
+        }
     }
 
     private Uri generateFileUri() {
