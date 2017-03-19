@@ -7,21 +7,27 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.IBinder;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import com.osadchuk.scheduler.R;
 import com.osadchuk.scheduler.activity.SettingsActivity;
 import java.util.Timer;
 import java.util.TimerTask;
 
+
+
 public class SchedulerService extends Service {
 
     private final String TAG = SchedulerService.class.getCanonicalName();
-
-    private Timer timer;
-    private TimerTask timerTask;
     //private final int CHECK_INTERVAL = 30 * 60 * 1000;
     private final int CHECK_INTERVAL = 10 * 1000;
+    private final int NOTIFICATION_ID=0;
+    private final int PENDING_SETTING=0;
+    private final int START_TIME=0;
+    private Timer timer;
+    private TimerTask timerTask;
 
     @Override
     public void onCreate() {
@@ -31,40 +37,54 @@ public class SchedulerService extends Service {
     }
 
     private void showNotification(String message) {
+
         Context notifyContext=getApplicationContext();
         Intent notifyIntent = new Intent(notifyContext, SettingsActivity.class);
 
         PendingIntent contentIntent = PendingIntent.getActivity
-                (notifyContext, 0,notifyIntent, PendingIntent.FLAG_ONE_SHOT);
+                (notifyContext, PENDING_SETTING,notifyIntent,PENDING_SETTING);
 
-        Notification.Builder builder = new Notification.Builder(notifyContext);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(notifyContext);
+
         builder.setContentIntent(contentIntent)
+                .setContentTitle(message)
                 .setSmallIcon(R.mipmap.ic_launcher)
-                .setWhen(System.currentTimeMillis())
-                .setAutoCancel(true)
-                .setContentText(message);
-        Notification notify = builder.build();
+                .setWhen(System.currentTimeMillis());
+
+        Notification notification = builder.build();
+
         NotificationManager notificationManager = (NotificationManager)
                 notifyContext.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(0, notify);
+
+        notificationManager.notify(NOTIFICATION_ID, notification);
     }
 
     @Override
-    public int onStartCommand(final Intent intent, int flags, int startId) {
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        final String message;
+
         Log.d(TAG, "onStartCommand");
+
+        if(intent==null) {
+            SharedPreferences preferences = getApplicationContext().getSharedPreferences("prefs",
+                    Context.MODE_PRIVATE);
+            message = preferences.getString("message", getApplicationContext().
+                    getString(R.string.default_notification_message));
+        }else
+            message=intent.getStringExtra("message");
 
         timer = new Timer();
         timerTask = new TimerTask() {
+
             @Override
             public void run() {
-                if (intent != null){
-                    showNotification(intent.getStringExtra("message"));
-                }
+                        showNotification(message);
             }
         };
-        timer.schedule(timerTask, 0, CHECK_INTERVAL);
 
-        return super.onStartCommand(intent, flags, startId);
+        timer.schedule(timerTask, START_TIME, CHECK_INTERVAL);
+
+        return Service.START_STICKY;
     }
 
     @Override
