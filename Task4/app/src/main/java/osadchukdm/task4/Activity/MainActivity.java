@@ -6,28 +6,19 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-
 import android.support.v7.app.AppCompatActivity;
-
 import android.support.v7.widget.LinearLayoutManager;
-
+import android.util.Log;
 import android.view.View;
-
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
 import java.io.File;
 import java.util.ArrayList;
-
 import android.support.v7.widget.RecyclerView;
-
 import com.bumptech.glide.Glide;
-
 import osadchukdm.task4.Adaptor.RecyclerAdapter;
 import osadchukdm.task4.Interface.RecyclerClick;
 import osadchukdm.task4.R;
-
 
 public class MainActivity extends AppCompatActivity{
 
@@ -35,6 +26,9 @@ public class MainActivity extends AppCompatActivity{
     private final int HIGHT=800;
     private final int WIGHT=800;
     private final int HORIZONTAL=0;
+    private final int SIZE=2;
+    private final int VISIBLE=1;
+
 
     ImageView photo;
     String imagePath;
@@ -42,12 +36,9 @@ public class MainActivity extends AppCompatActivity{
     File newFile;
     RecyclerView recyclerView;
     RecyclerAdapter mAdapter;
-    //RecyclerView.LayoutManager mLayoutManager;
     Context context;
-    ArrayList<String> mDataSet;
-    private LinearLayoutManager mLayoutManager;
-    Animation animation;
 
+    private LinearLayoutManager mLayoutManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,17 +47,10 @@ public class MainActivity extends AppCompatActivity{
 
         context=getApplicationContext();
 
-        mDataSet = new ArrayList<String>();
         photo = (ImageView) findViewById(R.id.ivPhoto);
-        //animation = AnimationUtils.loadAnimation(context, R.anim.invisible_to_visible);
-
-        //photo.startAnimation(animation);
-
         recyclerView = (RecyclerView) findViewById(R.id.rec);
 
-        getDataSet();
-
-        initAdaptor();
+        initAdaptor(getDataSet());
 
         final Button makePhoto = (Button) findViewById(R.id.buttonFoto);
         makePhoto.setOnClickListener(new View.OnClickListener() {
@@ -91,7 +75,7 @@ public class MainActivity extends AppCompatActivity{
         outState.putString("key", imagePath);
     }
 
-    private void initAdaptor(){
+    private void initAdaptor(final ArrayList<String> mDataSet){
         if(mDataSet!=null) {
             mLayoutManager = new LinearLayoutManager(this, HORIZONTAL, false);
             recyclerView.setLayoutManager(mLayoutManager);
@@ -123,28 +107,35 @@ public class MainActivity extends AppCompatActivity{
     }
 
     private void checkFirstLastItems() {
-        int firstCompletePosition = mLayoutManager.
-                findFirstCompletelyVisibleItemPosition();
-        int lastCompletePosition = mLayoutManager.findLastCompletelyVisibleItemPosition();
 
         int firstAlphaPosition = mLayoutManager.findFirstVisibleItemPosition();
         int lastAlphaPosition = mLayoutManager.findLastVisibleItemPosition();
 
         View view = mLayoutManager.findViewByPosition(firstAlphaPosition);
-        int locations[] = new int[2];
+        int locations[] = new int[SIZE];
         view.getLocationOnScreen(locations);
-        float alpha = 1 - Math.abs((float) locations[0] / view.getMeasuredWidth());
+        float alpha = 1 - Math.abs((float) locations[0] /
+                view.getMeasuredWidth());
+        Log.d("+++", String.valueOf(alpha));
         view.setAlpha(alpha);
 
         view = mLayoutManager.findViewByPosition(lastAlphaPosition);
-        locations = new int[2];
+        locations = new int[SIZE];
         view.getLocationOnScreen(locations);
-        alpha = Math.abs((float)(recyclerView.getMeasuredWidth() - locations[0]) / view.getMeasuredWidth());
+        alpha = Math.abs((float)(recyclerView.getMeasuredWidth() -
+                locations[0]) / view.getMeasuredWidth());
+        Log.d("+++", "va "+String.valueOf(alpha));
         view.setAlpha(alpha);
+        checkCompleteItem(view);
 
+    }
+
+    private void checkCompleteItem(View completeView){
+        int firstCompletePosition = mLayoutManager.findFirstCompletelyVisibleItemPosition();
+        int lastCompletePosition = mLayoutManager.findLastCompletelyVisibleItemPosition();
         for (int i = firstCompletePosition; i <= lastCompletePosition; i++) {
-            view = mLayoutManager.findViewByPosition(i);
-            view.setAlpha(1f);
+            completeView = mLayoutManager.findViewByPosition(i);
+            completeView.setAlpha(VISIBLE);
         }
     }
 
@@ -157,29 +148,40 @@ public class MainActivity extends AppCompatActivity{
 
     private void paint(String  path){
 
-
         Glide.with(context).load(path).
                 override(HIGHT,WIGHT).
                 centerCrop().into(photo);
-        //photo.startAnimation(animation);
-
     }
 
-    private void getDataSet() {
-        File[] fList;
-        try {
-            File F = new File(Environment.getExternalStorageDirectory(),
-                    "Camera Test");
+    private ArrayList<String> getDataSet() {
+                ArrayList<String> data= new ArrayList<String>();
+                File[] fList;
+                try {
+                    File F = new File(Environment.getExternalStorageDirectory(),
+                            getString(R.string.name_path));
 
-            fList = F.listFiles();
+                    fList = F.listFiles();
 
-            for (int i = 0; i < fList.length; i++) {
-                if (fList[i].isFile())
-                    mDataSet.add(fList[i].getPath().toString());
-            }
-        }catch (Exception e){
-            return;
-        }
+                    for (int i = 0; i < fList.length; i++) {
+                        if (fList[i].isFile())
+                            data.add(fList[i].getPath().toString());
+                    }
+                } catch (Exception e) {
+                    return null;
+                }
+        return data;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d("+++","resume");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d("+++","destroy");
     }
 
     @Override
@@ -189,9 +191,7 @@ public class MainActivity extends AppCompatActivity{
         if(requestCode == CAMERA_RESULT && resultCode == RESULT_OK) {
             paint(directory.toString());
             imagePath = directory.toString();
-            mDataSet.add(directory.toString());
-            recyclerView.getAdapter().notifyDataSetChanged();
-
+            mAdapter.addImage(directory.toString());
         }
     }
 
@@ -202,7 +202,7 @@ public class MainActivity extends AppCompatActivity{
             return null;
 
         File path = new File(Environment.getExternalStorageDirectory(),
-                "Camera Test");
+                getString(R.string.name_path));
         if (!path.exists()) {
             if (!path.mkdirs()) {
                 return null;
@@ -212,7 +212,6 @@ public class MainActivity extends AppCompatActivity{
         String timeStamp = String.valueOf(System.currentTimeMillis());
         newFile = new File(path.getPath() + File.separator + timeStamp + ".jpg");
         return Uri.fromFile(newFile);
+
     }
-
-
 }
