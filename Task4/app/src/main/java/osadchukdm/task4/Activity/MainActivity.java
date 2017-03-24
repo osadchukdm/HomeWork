@@ -8,7 +8,6 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -76,7 +75,6 @@ public class MainActivity extends AppCompatActivity{
     }
 
     private void initAdaptor(final ArrayList<String> mDataSet){
-        if(mDataSet!=null) {
             mLayoutManager = new LinearLayoutManager(this, HORIZONTAL, false);
             recyclerView.setLayoutManager(mLayoutManager);
             mAdapter = new RecyclerAdapter(mDataSet, context);
@@ -103,11 +101,10 @@ public class MainActivity extends AppCompatActivity{
                     checkFirstLastItems();
                 }
             });
-        }
     }
 
     private void checkFirstLastItems() {
-
+    try {
         int firstAlphaPosition = mLayoutManager.findFirstVisibleItemPosition();
         int lastAlphaPosition = mLayoutManager.findLastVisibleItemPosition();
 
@@ -115,22 +112,23 @@ public class MainActivity extends AppCompatActivity{
         int locations[] = new int[SIZE];
         view.getLocationOnScreen(locations);
         float alpha = 1 - Math.abs((float) locations[0] /
-                view.getMeasuredWidth());
-        Log.d("+++", String.valueOf(alpha));
+            view.getMeasuredWidth());
         view.setAlpha(alpha);
 
         view = mLayoutManager.findViewByPosition(lastAlphaPosition);
         locations = new int[SIZE];
         view.getLocationOnScreen(locations);
-        alpha = Math.abs((float)(recyclerView.getMeasuredWidth() -
-                locations[0]) / view.getMeasuredWidth());
-        Log.d("+++", "va "+String.valueOf(alpha));
+        alpha = Math.abs((float) (recyclerView.getMeasuredWidth() -
+            locations[0]) / view.getMeasuredWidth());
         view.setAlpha(alpha);
         checkCompleteItem(view);
-
     }
+    catch (Exception e){}
+}
+
 
     private void checkCompleteItem(View completeView){
+
         int firstCompletePosition = mLayoutManager.findFirstCompletelyVisibleItemPosition();
         int lastCompletePosition = mLayoutManager.findLastCompletelyVisibleItemPosition();
         for (int i = firstCompletePosition; i <= lastCompletePosition; i++) {
@@ -167,21 +165,9 @@ public class MainActivity extends AppCompatActivity{
                             data.add(fList[i].getPath().toString());
                     }
                 } catch (Exception e) {
-                    return null;
+
                 }
         return data;
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Log.d("+++","resume");
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        Log.d("+++","destroy");
     }
 
     @Override
@@ -192,6 +178,8 @@ public class MainActivity extends AppCompatActivity{
             paint(directory.toString());
             imagePath = directory.toString();
             mAdapter.addImage(directory.toString());
+            mLayoutManager.scrollToPosition(mAdapter.getItemCount() - 1);
+            checkFirstLastItems();
         }
     }
 
