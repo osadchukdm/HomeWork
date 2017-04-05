@@ -1,6 +1,4 @@
 <resources>
-    <string name="app_name">Task4</string>
-    <string name="color_effect">Color Effect</string>
-    <string name="flash_mode">Flash Mode</string>
-    <string name="name_path">Camera Test</string>
+    <string name="app_name">TaskFour</string>
+    <string name="take_photo">Take photo</string>
 </resources>

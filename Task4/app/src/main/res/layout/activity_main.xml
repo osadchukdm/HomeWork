@@ -1,44 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="osadchukdm.task4.Activity.MainActivity">
+    android:layout_height="match_parent">
 
-    <Button
-        android:id="@+id/buttonFoto"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="invisible"
-
-        android:layout_above="@+id/rec"
-        android:layout_centerHorizontal="true" />
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rec"
-
-        android:elevation="2dp"
-
-        android:layout_height="126dp"
-        android:scrollbars="horizontal"
+    <ImageView
+        android:id="@+id/imagePreview"
         android:layout_width="match_parent"
-
-        android:layout_marginTop="400dp"
-        android:alpha="0" />
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop" />
 
     <RelativeLayout
+        android:id="@+id/bottomContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <ImageView
-            android:id="@+id/ivPhoto"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+        <Button
+            android:id="@+id/buttonTakePhoto"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/galleryView"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="20dp" />
 
-        </ImageView>
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/galleryView"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/gallery_preview_height"
+            android:layout_alignParentBottom="true"></android.support.v7.widget.RecyclerView>
 
     </RelativeLayout>
 
-</FrameLayout>
+</RelativeLayout>

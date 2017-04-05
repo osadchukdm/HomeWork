@@ -1,0 +1,6 @@
+<resources>
+
+    <dimen name="gallery_preview_height">100dp</dimen>
+    <dimen name="take_photo_height">50dp</dimen>
+
+</resources>
