@@ -17,18 +17,21 @@
         android:layout_height="match_parent">
 
         <Button
-            android:id="@+id/buttonTakePhoto"
+            android:id="@+id/buttonFoto"
+            android:alpha="0.8"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_above="@+id/galleryView"
             android:layout_centerHorizontal="true"
-            android:layout_marginBottom="20dp" />
+            android:layout_marginBottom="20dp"/>
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/galleryView"
+            android:alpha="0.7"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/gallery_preview_height"
-            android:layout_alignParentBottom="true"></android.support.v7.widget.RecyclerView>
+            android:layout_height="100dp"
+            android:layout_alignParentBottom="true">
+        </android.support.v7.widget.RecyclerView>
 
     </RelativeLayout>
 

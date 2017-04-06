@@ -1,4 +1,5 @@
 <resources>
-    <string name="app_name">TaskFour</string>
-    <string name="take_photo">Take photo</string>
+    <string name="app_name">Task4</string>
+    <string name="color_effect">Color Effect</string>
+    <string name="flash_mode">Flash Mode</string>
 </resources>

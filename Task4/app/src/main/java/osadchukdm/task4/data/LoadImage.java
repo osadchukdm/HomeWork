@@ -1,4 +1,5 @@
-package com.osadchuk.data;
+package osadchukdm.task4.data;
+
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -10,32 +11,16 @@ import android.widget.ImageView;
 
 import java.io.IOException;
 
-public class ImageLoader {
-
-    private final int PREVIEW_IMAGE_WIDTH = 600;
-    private final int PREVIEW_IMAGE_HEIGHT = 600;
-    private final int THUMB_IMAGE_WIDTH = 150;
-    private final int THUMB_IMAGE_HEIGHT = 150;
+public class LoadImage {
 
     private Handler handler;
 
-    public ImageLoader() {
+    public LoadImage() {
         handler = new Handler();
     }
 
-    public void destroy() {
-        handler.removeCallbacks(null);
-    }
-
-    public void displayPreview(ImageView view, Uri uri) {
-        loadImage(view, uri, PREVIEW_IMAGE_WIDTH, PREVIEW_IMAGE_HEIGHT);
-    }
-
-    public void displayThumb(ImageView view, Uri uri) {
-        loadImage(view, uri, THUMB_IMAGE_WIDTH, THUMB_IMAGE_HEIGHT);
-    }
-
-    private void loadImage(final ImageView view, final Uri uri, final int width, final int height) {
+    public void loadImage(final ImageView view, final Uri uri, final int width,
+                          final int height) {
         Thread loadTask = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -45,9 +30,9 @@ public class ImageLoader {
                 BitmapFactory.decodeFile(uri.getPath(), options);
                 options.inSampleSize = calculateInSampleSize(options, width, height);
                 options.inJustDecodeBounds = false;
-                Bitmap bitmap = null;
+                Bitmap bitmap = BitmapFactory.decodeFile(uri.getPath(), options);
                 try {
-                    bitmap = rotateImageIfRequired(BitmapFactory.decodeFile(uri.getPath(), options),uri);
+                    bitmap = rotateImageIfRequired(bitmap,uri);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -66,14 +51,16 @@ public class ImageLoader {
     }
 
 
-    public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+    public static int calculateInSampleSize(BitmapFactory.Options options,
+                                            int reqWidth, int reqHeight) {
         final int height = options.outHeight;
         final int width = options.outWidth;
         int inSampleSize = 1;
         if (height > reqHeight || width > reqWidth) {
             final int halfHeight = height / 2;
             final int halfWidth = width / 2;
-            while ((halfHeight / inSampleSize) >= reqHeight && (halfWidth / inSampleSize) >= reqWidth) {
+            while ((halfHeight / inSampleSize) >= reqHeight && (halfWidth /
+                    inSampleSize) >= reqWidth) {
                 inSampleSize *= 2;
             }
         }
@@ -81,10 +68,12 @@ public class ImageLoader {
         return inSampleSize;
     }
 
-    private static Bitmap rotateImageIfRequired(Bitmap img, Uri selectedImage)throws IOException {
+    private static Bitmap rotateImageIfRequired(Bitmap img, Uri selectedImage)
+            throws IOException {
 
         ExifInterface ei = new ExifInterface(selectedImage.getPath());
-        int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+        int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION,
+                ExifInterface.ORIENTATION_NORMAL);
 
         switch (orientation) {
             case ExifInterface.ORIENTATION_ROTATE_90:
@@ -101,7 +90,8 @@ public class ImageLoader {
     private static Bitmap rotateImage(Bitmap img, int degree) {
         Matrix matrix = new Matrix();
         matrix.postRotate(degree);
-        Bitmap rotatedImg = Bitmap.createBitmap(img, 0, 0, img.getWidth(), img.getHeight(), matrix, true);
+        Bitmap rotatedImg = Bitmap.createBitmap(img, 0, 0, img.getWidth(),
+                img.getHeight(), matrix, true);
         img.recycle();
         return rotatedImg;
     }
