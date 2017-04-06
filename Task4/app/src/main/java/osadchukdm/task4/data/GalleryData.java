@@ -9,7 +9,7 @@ import osadchukdm.task4.constants.Constants;
 
 public class GalleryData {
 
-    public File generateFileUri() {
+    public File generateFilePath() {
 
         if (!Environment.getExternalStorageState().equals(Environment.
                 MEDIA_MOUNTED))
@@ -25,7 +25,7 @@ public class GalleryData {
 
     public ArrayList<String> getData() {
         ArrayList<String> data = new ArrayList<String>();
-        File cacheFolder=generateFileUri();
+        File cacheFolder= generateFilePath();
         File[] fList = cacheFolder.listFiles();
 
         for (int i = 0; i < fList.length; i++) {
@@ -38,7 +38,7 @@ public class GalleryData {
     public Uri generateNewFileName() {
 
         String timeStamp = String.valueOf(System.currentTimeMillis());
-        File newFile = new File(generateFileUri().getPath() + File.separator +
+        File newFile = new File(generateFilePath().getPath() + File.separator +
                 timeStamp + ".jpg");
         return Uri.fromFile(newFile);
     }
