@@ -7,9 +7,12 @@ import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Handler;
+import android.util.Log;
 import android.widget.ImageView;
 
 import java.io.IOException;
+
+import osadchukdm.task4.constants.Constants;
 
 public class LoadImage {
 
@@ -19,8 +22,7 @@ public class LoadImage {
         handler = new Handler();
     }
 
-    public void loadImage(final ImageView view, final Uri uri, final int width,
-                          final int height) {
+    public void loadImage(final ImageView view, final Uri uri) {
         Thread loadTask = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -28,7 +30,8 @@ public class LoadImage {
                 final BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inJustDecodeBounds = true;
                 BitmapFactory.decodeFile(uri.getPath(), options);
-                options.inSampleSize = calculateInSampleSize(options, width, height);
+                options.inSampleSize = calculateInSampleSize(options, options.outWidth/Constants.RESIZE_IMAGE,
+                        options.outHeight/Constants.RESIZE_IMAGE);
                 options.inJustDecodeBounds = false;
                 Bitmap bitmap = BitmapFactory.decodeFile(uri.getPath(), options);
                 try {

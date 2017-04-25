@@ -1,9 +1,12 @@
 package osadchukdm.task4.adapter;
 
+import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
+
 import java.util.ArrayList;
 import osadchukdm.task4.R;
 import osadchukdm.task4.interfaces.RecyclerClick;
@@ -14,15 +17,17 @@ public class RecyclerAdapter extends RecyclerView.Adapter<ViewHolder>{
     ArrayList<String> pathList;
     LoadImage loadImage;
     RecyclerClick recyclerClick;
+    Context context;
 
     public void SetOnItemClickListener(final RecyclerClick recyclerClick) {
         this.recyclerClick = recyclerClick;
     }
 
-    public RecyclerAdapter(ArrayList<String> dataSet, LoadImage loadImage) {
+    public RecyclerAdapter(ArrayList<String> dataSet, LoadImage loadImage, Context appContext) {
 
         pathList = dataSet;
         this.loadImage=loadImage;
+        this.context=appContext;
     }
 
     @Override
@@ -42,7 +47,11 @@ public class RecyclerAdapter extends RecyclerView.Adapter<ViewHolder>{
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, final int position) {
+
+
+
         holder.loadImage(loadImage, pathList.get(position));
+        holder.photoSmall.startAnimation(AnimationUtils.loadAnimation(context, R.anim.show));
 
         holder.photoSmall.setOnClickListener(new View.OnClickListener() {
             @Override

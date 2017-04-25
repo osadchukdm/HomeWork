@@ -1,19 +1,16 @@
 package osadchukdm.task4.activity;
 
-import android.animation.Animator;
-import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
+import android.util.Log;
 import android.view.View;
-import android.view.animation.LinearInterpolator;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
-
 import java.util.ArrayList;
 import android.support.v7.widget.RecyclerView;
 import osadchukdm.task4.adapter.RecyclerAdapter;
@@ -27,48 +24,43 @@ import osadchukdm.task4.data.LoadImage;
 public class MainActivity extends AppCompatActivity{
 
     private ImageView photo;
-    private String imagePath=null;
-    private Uri directory=null;
+    private String imagePath;
+    private Uri directory;
     private RecyclerView recyclerView;
     private RecyclerAdapter recyclerAdapter;
-    private ArrayList<String> data;
     private LoadImage loadImage;
     private Button makePhoto;
-    private boolean isBottomAnimation;
-    private Handler bottomAnimationHandler;
-    private Runnable hideRunnable;
     private View bottomContainer;
     private LinearLayoutManager layoutManager;
     private GalleryData galleryData;
-
+    private boolean isVisible=false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        settingApp(savedInstanceState);
+    }
 
+    private void settingApp(Bundle instanceState){
+        ArrayList<String> data;
         init();
-
-        recyclerView = (RecyclerView) findViewById(R.id.galleryView);
-        makePhoto = (Button) findViewById(R.id.buttonFoto);
+        findViews();
         makePhoto.setBackgroundResource(R.drawable.camera);
-        photo = (ImageView) findViewById(R.id.imagePreview);
-        bottomContainer = findViewById(R.id.bottomContainer);
 
-        bottomContainer.setVisibility(View.INVISIBLE);
+        if(instanceState!=null)
+            isVisible = instanceState.getBoolean("settingVisible");
 
-        hideRunnable = new Runnable() {
-            @Override
-            public void run() {
-                showBottomContainer(false);
-            }
-        };
+        if(isVisible)
+            bottomContainer.setVisibility(View.VISIBLE);
+        else
+            bottomContainer.setVisibility(View.INVISIBLE);
 
         data=galleryData.getData();
         setAdapter(data);
-        setClickListener();
+        settingClickListener(photo,makePhoto,recyclerAdapter);
 
-        if(savedInstanceState==null && data.size()>0){
+        if(instanceState==null && data.size()>0){
             imagePath=data.get(0);
             openImage(imagePath);
         }
@@ -77,85 +69,52 @@ public class MainActivity extends AppCompatActivity{
     private void init(){
         loadImage=new LoadImage();
         galleryData=new GalleryData();
-        bottomAnimationHandler = new Handler();
         layoutManager = new LinearLayoutManager(this,Constants.HORIZONTAL,
                 false);
     }
 
-    private void setClickListener(){
+    private void findViews(){
+        recyclerView = (RecyclerView) findViewById(R.id.galleryView);
+        makePhoto = (Button) findViewById(R.id.buttonFoto);
+        photo = (ImageView) findViewById(R.id.imagePreview);
+        bottomContainer = findViewById(R.id.bottomContainer);
+    }
 
-        photo.setOnClickListener(new View.OnClickListener() {
+    private void settingClickListener(ImageView mainPhoto,Button createPhoto,
+                                      RecyclerAdapter galleryPhoto){
+        mainPhoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showBottomContainer(bottomContainer.getVisibility() ==
-                        View.INVISIBLE);
-                queueHideRunnable();
-
-            }
+                showBottomContainer(bottomContainer.getVisibility(), bottomContainer);
+                }
         });
 
-        makePhoto.setOnClickListener(new View.OnClickListener() {
+        createPhoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 makePhoto();
-                queueHideRunnable();
             }
         });
 
-        recyclerAdapter.SetOnItemClickListener(new RecyclerClick() {
+        galleryPhoto.SetOnItemClickListener(new RecyclerClick() {
             @Override
             public void onItemClick(String positionImage) {
-                openImage(positionImage);
                 imagePath = positionImage;
-                queueHideRunnable();
+                openImage(imagePath);
             }
         });
-
-    }
-    private void queueHideRunnable() {
-        bottomAnimationHandler.removeCallbacks(hideRunnable);
-
-        if (bottomContainer.getVisibility() == View.VISIBLE)
-            bottomAnimationHandler.postDelayed(hideRunnable,
-                    Constants.BOTTOM_ANIMATION_DURATION_INTERVAL);
     }
 
-    private void showBottomContainer(final boolean show) {
-
-        if (isBottomAnimation)
-            return;
-
-        isBottomAnimation = true;
-
-        float startPos = show ? (float) bottomContainer.getMeasuredHeight() : 0f;
-        float endPos = show ? 0f : (float) bottomContainer.getMeasuredHeight();
-
-        ObjectAnimator translateY = ObjectAnimator.ofFloat(bottomContainer, "y",
-                startPos, endPos);
-        translateY.setDuration(Constants.BOTTOM_ANIMATION_DURATION);
-        translateY.setInterpolator(new LinearInterpolator());
-        translateY.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animator) {
-                bottomContainer.setVisibility(View.VISIBLE);
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animator) {
-                isBottomAnimation = false;
-                bottomContainer.setVisibility(show ? View.VISIBLE :
-                        View.INVISIBLE);
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animator) {
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animator) {
-            }
-        });
-        translateY.start();
+    private void showBottomContainer(final int show, View animationView) {
+        if(show!=View.VISIBLE){
+            animationView.startAnimation(AnimationUtils.loadAnimation(this, R.anim.visible));
+            animationView.setVisibility(View.VISIBLE);
+            isVisible=true;
+        }  else{
+            animationView.startAnimation(AnimationUtils.loadAnimation(this, R.anim.invis));
+            animationView.setVisibility(View.INVISIBLE);
+            isVisible=false;
+        }
     }
 
     @Override
@@ -168,7 +127,7 @@ public class MainActivity extends AppCompatActivity{
 
         try{
             directory = Uri.parse(savedInstanceState.getString("resultImage"));
-        }catch (NullPointerException e) {
+        }catch (NullPointerException e){
             e.printStackTrace();
         }
     }
@@ -178,14 +137,15 @@ public class MainActivity extends AppCompatActivity{
         super.onSaveInstanceState(outState);
 
         outState.putString("key", imagePath);
-
+        outState.putBoolean("settingVisible",isVisible);
         if(directory!=null)
             outState.putString("resultImage", directory.toString());
     }
 
     private void setAdapter(final ArrayList<String> list){
+
         recyclerView.setLayoutManager(layoutManager);
-        recyclerAdapter = new RecyclerAdapter(list,loadImage);
+        recyclerAdapter = new RecyclerAdapter(list,loadImage,this);
         recyclerView.setAdapter(recyclerAdapter);
 
     }
@@ -193,13 +153,14 @@ public class MainActivity extends AppCompatActivity{
     private void makePhoto(){
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         directory = galleryData.generateNewFileName();
+        //imagePath=directory.toString();
         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, directory);
         startActivityForResult(cameraIntent,Constants.CAMERA_RESULT);
     }
 
     private void openImage(String  path){
-       loadImage.loadImage(photo,Uri.parse(path),Constants.HEIGHT_MAIN,
-               Constants.WIDTH_MAIN);
+        loadImage.loadImage(photo,Uri.parse(path));
+        photo.startAnimation(AnimationUtils.loadAnimation(this,R.anim.res));
     }
 
     @Override
@@ -207,10 +168,10 @@ public class MainActivity extends AppCompatActivity{
                                     Intent data) {
 
         if(requestCode == Constants.CAMERA_RESULT && resultCode == RESULT_OK) {
-            openImage(directory.toString());
-            imagePath = directory.toString();
-            recyclerAdapter.addImage(directory.toString());
-
+            imagePath=directory.toString();
+            openImage(imagePath);
+            layoutManager.scrollToPosition(recyclerAdapter.getItemCount()-1);
         }
     }
+
 }
