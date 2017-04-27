@@ -14,8 +14,8 @@ import osadchukdm.task4.data.LoadImage;
 
 public class RecyclerAdapter extends RecyclerView.Adapter<ViewHolder>{
 
-    ArrayList<String> pathList;
-    LoadImage loadImage;
+    ArrayList<String> items;
+    LoadImage loadGalleryItem;
     RecyclerClick recyclerClick;
     Context context;
 
@@ -25,8 +25,8 @@ public class RecyclerAdapter extends RecyclerView.Adapter<ViewHolder>{
 
     public RecyclerAdapter(ArrayList<String> dataSet, LoadImage loadImage, Context appContext) {
 
-        pathList = dataSet;
-        this.loadImage=loadImage;
+        items = dataSet;
+        this.loadGalleryItem =loadImage;
         this.context=appContext;
     }
 
@@ -41,7 +41,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<ViewHolder>{
     }
 
     public void addImage(String data){
-        pathList.add(data);
+        items.add(data);
         notifyDataSetChanged();
     }
 
@@ -50,21 +50,21 @@ public class RecyclerAdapter extends RecyclerView.Adapter<ViewHolder>{
 
 
 
-        holder.loadImage(loadImage, pathList.get(position));
-        holder.photoSmall.startAnimation(AnimationUtils.loadAnimation(context, R.anim.show));
+        holder.loadImage(loadGalleryItem, items.get(position));
+        holder.galleryItem.startAnimation(AnimationUtils.loadAnimation(context, R.anim.show_items));
 
-        holder.photoSmall.setOnClickListener(new View.OnClickListener() {
+        holder.galleryItem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (recyclerClick != null)
-                    recyclerClick.onItemClick(pathList.get(position));
+                    recyclerClick.onItemClick(items.get(position));
             }
         });
     }
 
     @Override
     public int getItemCount() {
-        return pathList.size();
+        return items.size();
     }
 }
 

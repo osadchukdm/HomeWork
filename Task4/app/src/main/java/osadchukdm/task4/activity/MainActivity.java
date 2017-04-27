@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
-import android.util.Log;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
@@ -23,14 +22,14 @@ import osadchukdm.task4.data.LoadImage;
 
 public class MainActivity extends AppCompatActivity{
 
-    private ImageView photo;
+    private ImageView mainImage;
     private String imagePath;
     private Uri directory;
     private RecyclerView recyclerView;
     private RecyclerAdapter recyclerAdapter;
-    private LoadImage loadImage;
+    private LoadImage loadMainImage;
     private Button makePhoto;
-    private View bottomContainer;
+    private View viewContainer;
     private LinearLayoutManager layoutManager;
     private GalleryData galleryData;
     private boolean isVisible=false;
@@ -52,13 +51,13 @@ public class MainActivity extends AppCompatActivity{
             isVisible = instanceState.getBoolean("settingVisible");
 
         if(isVisible)
-            bottomContainer.setVisibility(View.VISIBLE);
+            viewContainer.setVisibility(View.VISIBLE);
         else
-            bottomContainer.setVisibility(View.INVISIBLE);
+            viewContainer.setVisibility(View.INVISIBLE);
 
         data=galleryData.getData();
         setAdapter(data);
-        settingClickListener(photo,makePhoto,recyclerAdapter);
+        settingClickListener(mainImage,makePhoto,recyclerAdapter);
 
         if(instanceState==null && data.size()>0){
             imagePath=data.get(0);
@@ -67,7 +66,7 @@ public class MainActivity extends AppCompatActivity{
     }
 
     private void init(){
-        loadImage=new LoadImage();
+        loadMainImage =new LoadImage();
         galleryData=new GalleryData();
         layoutManager = new LinearLayoutManager(this,Constants.HORIZONTAL,
                 false);
@@ -76,8 +75,8 @@ public class MainActivity extends AppCompatActivity{
     private void findViews(){
         recyclerView = (RecyclerView) findViewById(R.id.galleryView);
         makePhoto = (Button) findViewById(R.id.buttonFoto);
-        photo = (ImageView) findViewById(R.id.imagePreview);
-        bottomContainer = findViewById(R.id.bottomContainer);
+        mainImage = (ImageView) findViewById(R.id.imagePreview);
+        viewContainer = findViewById(R.id.container);
     }
 
     private void settingClickListener(ImageView mainPhoto,Button createPhoto,
@@ -85,7 +84,7 @@ public class MainActivity extends AppCompatActivity{
         mainPhoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showBottomContainer(bottomContainer.getVisibility(), bottomContainer);
+                showBottomContainer(viewContainer.getVisibility(), viewContainer);
                 }
         });
 
@@ -107,11 +106,11 @@ public class MainActivity extends AppCompatActivity{
 
     private void showBottomContainer(final int show, View animationView) {
         if(show!=View.VISIBLE){
-            animationView.startAnimation(AnimationUtils.loadAnimation(this, R.anim.visible));
+            animationView.startAnimation(AnimationUtils.loadAnimation(this, R.anim.show_recycler));
             animationView.setVisibility(View.VISIBLE);
             isVisible=true;
         }  else{
-            animationView.startAnimation(AnimationUtils.loadAnimation(this, R.anim.invis));
+            animationView.startAnimation(AnimationUtils.loadAnimation(this, R.anim.hide_recycler));
             animationView.setVisibility(View.INVISIBLE);
             isVisible=false;
         }
@@ -120,7 +119,7 @@ public class MainActivity extends AppCompatActivity{
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        imagePath = savedInstanceState.getString("key");
+        imagePath = savedInstanceState.getString("pathMainImage");
 
         if(imagePath!=null)
             openImage(imagePath);
@@ -136,7 +135,7 @@ public class MainActivity extends AppCompatActivity{
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        outState.putString("key", imagePath);
+        outState.putString("pathMainImage", imagePath);
         outState.putBoolean("settingVisible",isVisible);
         if(directory!=null)
             outState.putString("resultImage", directory.toString());
@@ -145,7 +144,7 @@ public class MainActivity extends AppCompatActivity{
     private void setAdapter(final ArrayList<String> list){
 
         recyclerView.setLayoutManager(layoutManager);
-        recyclerAdapter = new RecyclerAdapter(list,loadImage,this);
+        recyclerAdapter = new RecyclerAdapter(list, loadMainImage,this);
         recyclerView.setAdapter(recyclerAdapter);
 
     }
@@ -153,14 +152,13 @@ public class MainActivity extends AppCompatActivity{
     private void makePhoto(){
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         directory = galleryData.generateNewFileName();
-        //imagePath=directory.toString();
         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, directory);
         startActivityForResult(cameraIntent,Constants.CAMERA_RESULT);
     }
 
     private void openImage(String  path){
-        loadImage.loadImage(photo,Uri.parse(path));
-        photo.startAnimation(AnimationUtils.loadAnimation(this,R.anim.res));
+        loadMainImage.loadImage(mainImage,Uri.parse(path));
+        mainImage.startAnimation(AnimationUtils.loadAnimation(this,R.anim.show_main_photo));
     }
 
     @Override
