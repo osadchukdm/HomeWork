@@ -38,7 +38,7 @@ public class GalleryData {
     public Uri generateNewFileName() {
 
         String timeStamp = String.valueOf(System.currentTimeMillis());
-        File newFile = new File(generateFilePath().getPath() + File.separator +
+        File newFile = new File(generateFilePath().getPath()+ File.separator +
                 timeStamp + ".jpg");
         return Uri.fromFile(newFile);
     }

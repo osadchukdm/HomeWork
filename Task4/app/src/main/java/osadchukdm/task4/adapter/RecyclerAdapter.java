@@ -1,7 +1,9 @@
 package osadchukdm.task4.adapter;
 
 import android.content.Context;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,17 +42,10 @@ public class RecyclerAdapter extends RecyclerView.Adapter<ViewHolder>{
         return viewHolder;
     }
 
-    public void addImage(String data){
-        items.add(data);
-        notifyDataSetChanged();
-    }
-
     @Override
     public void onBindViewHolder(final ViewHolder holder, final int position) {
 
-
-
-        holder.loadImage(loadGalleryItem, items.get(position));
+        holder.loadImage(loadGalleryItem, Uri.parse(items.get(position)));
         holder.galleryItem.startAnimation(AnimationUtils.loadAnimation(context, R.anim.show_items));
 
         holder.galleryItem.setOnClickListener(new View.OnClickListener() {

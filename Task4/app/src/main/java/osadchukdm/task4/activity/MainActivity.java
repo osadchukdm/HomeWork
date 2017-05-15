@@ -6,10 +6,13 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
+
+import java.io.File;
 import java.util.ArrayList;
 import android.support.v7.widget.RecyclerView;
 import osadchukdm.task4.adapter.RecyclerAdapter;
@@ -22,9 +25,9 @@ import osadchukdm.task4.data.LoadImage;
 
 public class MainActivity extends AppCompatActivity{
 
+    private ArrayList<String> adapterData;
     private ImageView mainImage;
-    private String imagePath;
-    private Uri directory;
+    private Uri imagePath;
     private RecyclerView recyclerView;
     private RecyclerAdapter recyclerAdapter;
     private LoadImage loadMainImage;
@@ -33,6 +36,7 @@ public class MainActivity extends AppCompatActivity{
     private LinearLayoutManager layoutManager;
     private GalleryData galleryData;
     private boolean isVisible=false;
+    private boolean rotate=true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +46,6 @@ public class MainActivity extends AppCompatActivity{
     }
 
     private void settingApp(Bundle instanceState){
-        ArrayList<String> data;
         init();
         findViews();
         makePhoto.setBackgroundResource(R.drawable.camera);
@@ -54,13 +57,12 @@ public class MainActivity extends AppCompatActivity{
             viewContainer.setVisibility(View.VISIBLE);
         else
             viewContainer.setVisibility(View.INVISIBLE);
-
-        data=galleryData.getData();
-        setAdapter(data);
+        adapterData =galleryData.getData();
+        setAdapter(adapterData);
         settingClickListener(mainImage,makePhoto,recyclerAdapter);
 
-        if(instanceState==null && data.size()>0){
-            imagePath=data.get(0);
+        if(instanceState==null && adapterData.size()>0){
+            imagePath=Uri.parse(adapterData.get(0));
             openImage(imagePath);
         }
     }
@@ -84,7 +86,7 @@ public class MainActivity extends AppCompatActivity{
         mainPhoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showBottomContainer(viewContainer.getVisibility(), viewContainer);
+                showContainer(viewContainer.getVisibility(), viewContainer);
                 }
         });
 
@@ -98,13 +100,13 @@ public class MainActivity extends AppCompatActivity{
         galleryPhoto.SetOnItemClickListener(new RecyclerClick() {
             @Override
             public void onItemClick(String positionImage) {
-                imagePath = positionImage;
+                imagePath = Uri.parse(positionImage);
                 openImage(imagePath);
             }
         });
     }
 
-    private void showBottomContainer(final int show, View animationView) {
+    private void showContainer(final int show, View animationView) {
         if(show!=View.VISIBLE){
             animationView.startAnimation(AnimationUtils.loadAnimation(this, R.anim.show_recycler));
             animationView.setVisibility(View.VISIBLE);
@@ -119,26 +121,18 @@ public class MainActivity extends AppCompatActivity{
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        imagePath = savedInstanceState.getString("pathMainImage");
 
+        imagePath = Uri.parse(savedInstanceState.getString("pathMainImage"));
         if(imagePath!=null)
             openImage(imagePath);
-
-        try{
-            directory = Uri.parse(savedInstanceState.getString("resultImage"));
-        }catch (NullPointerException e){
-            e.printStackTrace();
-        }
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-
-        outState.putString("pathMainImage", imagePath);
+        outState.putString("pathMainImage", imagePath.toString());
         outState.putBoolean("settingVisible",isVisible);
-        if(directory!=null)
-            outState.putString("resultImage", directory.toString());
+
     }
 
     private void setAdapter(final ArrayList<String> list){
@@ -146,30 +140,32 @@ public class MainActivity extends AppCompatActivity{
         recyclerView.setLayoutManager(layoutManager);
         recyclerAdapter = new RecyclerAdapter(list, loadMainImage,this);
         recyclerView.setAdapter(recyclerAdapter);
+        recyclerAdapter.notifyDataSetChanged();
 
     }
 
     private void makePhoto(){
+        rotate=false;
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        directory = galleryData.generateNewFileName();
-        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, directory);
+        imagePath = galleryData.generateNewFileName();
+        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT,imagePath);
         startActivityForResult(cameraIntent,Constants.CAMERA_RESULT);
     }
 
-    private void openImage(String  path){
-        loadMainImage.loadImage(mainImage,Uri.parse(path));
+    private void openImage(Uri path){
+        loadMainImage.loadImage(mainImage,path);
         mainImage.startAnimation(AnimationUtils.loadAnimation(this,R.anim.show_main_photo));
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode,
                                     Intent data) {
-
         if(requestCode == Constants.CAMERA_RESULT && resultCode == RESULT_OK) {
-            imagePath=directory.toString();
+            if(!rotate)
+                adapterData.add(imagePath.toString());
+            recyclerAdapter.notifyDataSetChanged();
             openImage(imagePath);
             layoutManager.scrollToPosition(recyclerAdapter.getItemCount()-1);
         }
     }
-
 }
